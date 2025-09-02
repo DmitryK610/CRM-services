@@ -17,6 +17,7 @@ services:
       - pricelists_service
       - materials_service
       - material_purchases_service
+      - audit_service
     restart: unless-stopped
 
   # --- Users Service ---
@@ -222,6 +223,35 @@ services:
       - "33067:3306"
     restart: unless-stopped
 
+  # --- Audit Service ---
+  audit_service:
+    build: ./services/audit_service
+    env_file:
+      - ./services/audit_service/.env
+    container_name: audit_service
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./services/audit_service:/usr/src/app
+    ports:
+      - "8008:8000"
+    depends_on:
+      - audit_db
+    restart: unless-stopped
+
+  audit_db:
+    image: mysql:8.0
+    container_name: audit_db
+    volumes:
+      - audit_db_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=audit_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=root_password
+    ports:
+      - "33068:3306"
+    restart: unless-stopped
+
 volumes:
   users_db_data:
   clients_db_data:
@@ -230,4 +260,5 @@ volumes:
   pricelists_db_data:
   materials_db_data:
   material_purchases_db_data:
+  audit_db_data:
 

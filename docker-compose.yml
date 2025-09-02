@@ -1,0 +1,233 @@
+version: '3.8'
+
+services:
+  # --- API Gateway ---
+  gateway:
+    image: nginx:latest
+    container_name: gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - users_service
+      - clients_service
+      - orders_service
+      - calculations_service
+      - pricelists_service
+      - materials_service
+      - material_purchases_service
+    restart: unless-stopped
+
+  # --- Users Service ---
+  users_service:
+    build: ./services/users_service
+    env_file:
+      - ./services/users_service/.env
+    container_name: users_service
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./services/users_service:/usr/src/app
+    ports:
+      - "8001:8000"
+    depends_on:
+      - users_db
+    restart: unless-stopped
+  
+  users_db:
+    image: mysql:8.0
+    container_name: users_db
+    volumes:
+      - users_db_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=users_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=root_password
+    ports:
+      - "33061:3306"
+    restart: unless-stopped
+
+  # --- Clients Service ---
+  clients_service:
+    build: ./services/clients_service
+    env_file:
+      - ./services/clients_service/.env
+    container_name: clients_service
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./services/clients_service:/usr/src/app
+    ports:
+      - "8002:8000"
+    depends_on:
+      - clients_db
+    restart: unless-stopped
+
+  clients_db:
+    image: mysql:8.0
+    container_name: clients_db
+    volumes:
+      - clients_db_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=clients_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=root_password
+    ports:
+      - "33062:3306"
+    restart: unless-stopped
+
+  # --- Orders Service ---
+  orders_service:
+    build: ./services/orders_service
+    env_file:
+      - ./services/orders_service/.env
+    container_name: orders_service
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./services/orders_service:/usr/src/app
+    ports:
+      - "8003:8000"
+    depends_on:
+      - orders_db
+    restart: unless-stopped
+
+  orders_db:
+    image: mysql:8.0
+    container_name: orders_db
+    volumes:
+      - orders_db_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=orders_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=root_password
+    ports:
+      - "33063:3306"
+    restart: unless-stopped
+
+  # --- Calculations Service ---
+  calculations_service:
+    build: ./services/calculations_service
+    env_file:
+      - ./services/calculations_service/.env
+    container_name: calculations_service
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./services/calculations_service:/usr/src/app
+    ports:
+      - "8004:8000"
+    depends_on:
+      - calculations_db
+    restart: unless-stopped
+
+  calculations_db:
+    image: mysql:8.0
+    container_name: calculations_db
+    volumes:
+      - calculations_db_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=calculations_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=root_password
+    ports:
+      - "33064:3306"
+    restart: unless-stopped
+
+  # --- Pricelists Service ---
+  pricelists_service:
+    build: ./services/pricelists_service
+    env_file:
+      - ./services/pricelists_service/.env
+    container_name: pricelists_service
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./services/pricelists_service:/usr/src/app
+    ports:
+      - "8005:8000"
+    depends_on:
+      - pricelists_db
+    restart: unless-stopped
+
+  pricelists_db:
+    image: mysql:8.0
+    container_name: pricelists_db
+    volumes:
+      - pricelists_db_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=pricelists_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=root_password
+    ports:
+      - "33065:3306"
+    restart: unless-stopped
+
+  # --- Materials Service ---
+  materials_service:
+    build: ./services/materials_service
+    env_file:
+      - ./services/materials_service/.env
+    container_name: materials_service
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./services/materials_service:/usr/src/app
+    ports:
+      - "8006:8000"
+    depends_on:
+      - materials_db
+    restart: unless-stopped
+
+  materials_db:
+    image: mysql:8.0
+    container_name: materials_db
+    volumes:
+      - materials_db_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=materials_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=root_password
+    ports:
+      - "33066:3306"
+    restart: unless-stopped
+
+  # --- Material Purchases Service ---
+  material_purchases_service:
+    build: ./services/material_purchases_service
+    env_file:
+      - ./services/material_purchases_service/.env
+    container_name: material_purchases_service
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./services/material_purchases_service:/usr/src/app
+    ports:
+      - "8007:8000"
+    depends_on:
+      - material_purchases_db
+    restart: unless-stopped
+
+  material_purchases_db:
+    image: mysql:8.0
+    container_name: material_purchases_db
+    volumes:
+      - material_purchases_db_data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=material_purchases_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=root_password
+    ports:
+      - "33067:3306"
+    restart: unless-stopped
+
+volumes:
+  users_db_data:
+  clients_db_data:
+  orders_db_data:
+  calculations_db_data:
+  pricelists_db_data:
+  materials_db_data:
+  material_purchases_db_data:
+

@@ -88,7 +88,7 @@ DATABASES = {
         'PORT': config('DB_PORT', cast=int),
     }
 }
-}
+
 
 
 # Password validation

@@ -1,3 +1,18 @@
+class Supplier(models.Model):
+	company_name = models.CharField(_("Company Name"), max_length=255, db_column='названиеКомпании')
+	contact_person = models.CharField(_("Contact Person"), max_length=255, db_column='контактноеЛицо')
+	email = models.EmailField(_("Email"), db_column='электроннаяПочта')
+	supplier_address = models.TextField(_("Supplier Address"), db_column='адресПоставщика')
+	phone = models.CharField(_("Phone"), max_length=50, db_column='телефон')
+	created_at = models.DateTimeField(_("Created At"), auto_now_add=True)
+	note = models.TextField(_("Note"), blank=True, null=True, db_column='примечание')
+
+	def __str__(self):
+		return self.company_name
+
+	class Meta:
+		verbose_name = _("Поставщик")
+		verbose_name_plural = _("Поставщики")
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _

@@ -1,3 +1,6 @@
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
 class Supplier(models.Model):
 	company_name = models.CharField(_("Company Name"), max_length=255, db_column='названиеКомпании')
 	contact_person = models.CharField(_("Contact Person"), max_length=255, db_column='контактноеЛицо')
@@ -14,8 +17,6 @@ class Supplier(models.Model):
 		verbose_name = _("Поставщик")
 		verbose_name_plural = _("Поставщики")
 
-from django.db import models
-from django.utils.translation import gettext_lazy as _
 
 class Material(models.Model):
 	material_name = models.CharField(_("Material Name"), max_length=255, db_column='названиеМатериала')

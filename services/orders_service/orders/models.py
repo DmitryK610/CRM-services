@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from shared.enums import OrderStatus, PaymentMethod, PaymentStatus, AdvancePaymentTypeChoices
+from enums import OrderStatus, PaymentMethod, PaymentStatus, AdvancePaymentTypeChoices
 import pika
 import json
 

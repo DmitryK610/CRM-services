@@ -40,6 +40,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/users_service:/usr/src/app
+      - ./shared:/usr/src/shared 
     ports:
       - "8001:8000"
     depends_on:
@@ -69,6 +70,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/clients_service:/usr/src/app
+      - ./shared:/usr/src/shared 
     ports:
       - "8002:8000"
     depends_on:
@@ -98,6 +100,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/orders_service:/usr/src/app
+      - ./shared:/usr/src/shared 
     ports:
       - "8003:8000"
     depends_on:
@@ -127,6 +130,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/calculations_service:/usr/src/app
+      - ./shared:/usr/src/shared 
     ports:
       - "8004:8000"
     depends_on:
@@ -156,6 +160,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/pricelists_service:/usr/src/app
+      - ./shared:/usr/src/shared 
     ports:
       - "8005:8000"
     depends_on:
@@ -185,6 +190,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/materials_service:/usr/src/app
+      - ./shared:/usr/src/shared 
     ports:
       - "8006:8000"
     depends_on:
@@ -214,6 +220,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/material_purchases_service:/usr/src/app
+      - ./shared:/usr/src/shared 
     ports:
       - "8007:8000"
     depends_on:
@@ -243,6 +250,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./services/audit_service:/usr/src/app
+      - ./shared:/usr/src/shared 
     ports:
       - "8008:8000"
     depends_on:

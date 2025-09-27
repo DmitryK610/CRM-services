@@ -1,5 +1,6 @@
 import os
-from decouple import config
+from decouple import config, Csv
+from pathlib import Path
 """
 Django settings for core project.
 
@@ -12,7 +13,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-from pathlib import Path
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,9 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=0, cast=bool)
+DEBUG = config('DEBUG', default='False', cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
 
 # Application definition
@@ -93,7 +94,7 @@ DATABASES = {
         'PORT': config('DB_PORT', cast=int),
     }
 }
-}
+
 
 
 # Password validation

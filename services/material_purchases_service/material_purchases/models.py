@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-from shared.enums import PaymentMethod
+from enums import PaymentMethod
 
 class MaterialPurchase(models.Model):
 	material_id = models.IntegerField(_("ID материала"))

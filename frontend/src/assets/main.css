@@ -79,6 +79,21 @@ button:hover {
   background-color: #0056b3;
 }
 
+.loader-small {
+  display: inline-block;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #007bff;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 
 table {
   width: 100%;
@@ -96,6 +111,32 @@ td {
 th {
   background-color: #f0f0f0;
   font-weight: bold;
+}
+
+.table-empty-row {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.table-empty-row td {
+  
+  padding: 12px 16px;
+  font-size: 13px;
+  line-height: 1.4;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.table-empty-row--loading td {
+  font-style: normal;
+  color: #0065ff;
+}
+
+.table-empty-row .loader-inline,
+.table-empty-row .loader-small {
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
 }
 
 

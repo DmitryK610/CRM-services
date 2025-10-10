@@ -1,5 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.utils import timezone
 import pika
 import json
 
@@ -26,20 +29,57 @@ class Permission(models.Model):
 		verbose_name = _("Право доступа")
 		verbose_name_plural = _("Права доступа")
 
-class User(models.Model):
+class UserManager(BaseUserManager):
+	use_in_migrations = True
+
+	def _create_user(self, username, email, password, **extra_fields):
+		if not username:
+			raise ValueError("Username must be provided")
+		email = self.normalize_email(email)
+		user = self.model(username=username, email=email, **extra_fields)
+		if password:
+			user.set_password(password)
+		else:
+			user.set_unusable_password()
+		user.save(using=self._db)
+		return user
+
+	def create_user(self, username, email=None, password=None, **extra_fields):
+		extra_fields.setdefault('is_staff', False)
+		extra_fields.setdefault('is_superuser', False)
+		return self._create_user(username, email, password, **extra_fields)
+
+	def create_superuser(self, username, email=None, password=None, **extra_fields):
+		extra_fields.setdefault('is_staff', True)
+		extra_fields.setdefault('is_superuser', True)
+
+		if extra_fields.get('is_staff') is not True:
+			raise ValueError('Superuser must have is_staff=True.')
+		if extra_fields.get('is_superuser') is not True:
+			raise ValueError('Superuser must have is_superuser=True.')
+
+		return self._create_user(username, email, password, **extra_fields)
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+	username = models.CharField(_("Username"), max_length=150, unique=True)
 	full_name = models.CharField(_("Full Name"), max_length=255)
-	email = models.EmailField(_("Email"), unique=True)
+	email = models.EmailField(_("Email"), unique=True, blank=True, null=True)
 	phone = models.CharField(_("Phone"), max_length=50, blank=True, null=True)
-	password_hash = models.CharField(_("Password Hash"), max_length=255)
-	role_id = models.IntegerField(_("Role ID"), blank=True, null=True)
-	permission_ids = models.JSONField(_("Permission IDs"), default=list, blank=True)
+	role = models.ForeignKey(Role, on_delete=models.SET_NULL, blank=True, null=True, related_name='users', verbose_name=_("Role"))
+	permissions = models.ManyToManyField(Permission, blank=True, related_name='users', verbose_name=_("Permissions"))
 	is_active = models.BooleanField(_("Is Active"), default=True)
-	is_superuser = models.BooleanField(_("Is Superuser"), default=False)
-	registered_at = models.DateTimeField(_("Registered At"), auto_now_add=True)
-	last_login = models.DateTimeField(_("Last Login"), blank=True, null=True)
+	is_staff = models.BooleanField(_("Is Staff"), default=False)
+	registered_at = models.DateTimeField(_("Registered At"), default=timezone.now)
+
+	objects = UserManager()
+
+	EMAIL_FIELD = 'email'
+	USERNAME_FIELD = 'username'
+	REQUIRED_FIELDS = ['email']
 
 	def __str__(self):
-		return self.full_name
+		return self.full_name or self.username
 
 	class Meta:
 		verbose_name = _("Пользователь")
@@ -47,31 +87,35 @@ class User(models.Model):
 
 	def save(self, *args, **kwargs):
 		is_new = self.pk is None
+		if not self.registered_at:
+			self.registered_at = timezone.now()
 		super().save(*args, **kwargs)
 		if is_new:
 			self.send_user_created_event()
 
 	def send_user_created_event(self):
-		# Получаем имя роли пользователя
-		role_name = None
-		if self.role_id:
-			try:
-				role = Role.objects.get(id=self.role_id)
-				role_name = role.name
-			except Role.DoesNotExist:
-				role_name = None
-		connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))  # host из docker-compose
-		channel = connection.channel()
-		channel.queue_declare(queue='user_created')
-		event = {
-			'user_id': self.id,
-			'email': self.email,
-			'full_name': self.full_name,
-			'role_name': role_name
-		}
-		channel.basic_publish(
-			exchange='',
-			routing_key='user_created',
-			body=json.dumps(event)
-		)
-		connection.close()
+		role_name = self.role.name if self.role else None
+		connection = None
+		try:
+			connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))  # host из docker-compose
+			channel = connection.channel()
+			channel.queue_declare(queue='user_created')
+			event = {
+				'user_id': self.id,
+				'email': self.email,
+				'full_name': self.full_name,
+				'role_name': role_name
+			}
+			channel.basic_publish(
+				exchange='',
+				routing_key='user_created',
+				body=json.dumps(event)
+			)
+		except Exception:
+			pass
+		finally:
+			if connection:
+				try:
+					connection.close()
+				except Exception:
+					pass

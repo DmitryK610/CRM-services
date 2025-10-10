@@ -32,10 +32,14 @@
             <td>{{ supplier.supplier_address }}</td>
             <td>{{ supplier.note }}</td>
           </tr>
-          <tr v-if="!supplierStore.getIsLoading && supplierStore.getSuppliers.length === 0">
-            <td colspan="7" style="text-align:center; color:#856404; background:#fff3cd;">
-              Нет доступных поставщиков.
+          <tr v-if="supplierStore.getIsLoading" class="table-empty-row table-empty-row--loading">
+            <td colspan="7">
+              <span class="loader-small loader-inline"></span>
+              Загрузка поставщиков...
             </td>
+          </tr>
+          <tr v-else-if="supplierStore.getSuppliers.length === 0" class="table-empty-row">
+            <td colspan="7">Нет доступных поставщиков.</td>
           </tr>
         </tbody>
       </table>
@@ -187,7 +191,7 @@ tbody tr {
   transition: background-color 0.2s;
 }
 
-tbody tr:hover {
+tbody tr:not(.table-empty-row):hover {
   background-color: #f9f9f9;
 }
 

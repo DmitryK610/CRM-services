@@ -27,15 +27,14 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-if="(!clientStore.getClients || clientStore.getClients.length === 0)">
-            <td colspan="6" style="text-align:center;">
-              <template v-if="clientStore.isLoading">
-                <span class="loader-small"></span> Загрузка клиентов...
-              </template>
-              <template v-else>
-                Нет доступных клиентов.
-              </template>
+          <tr v-if="clientStore.getIsLoading" class="table-empty-row table-empty-row--loading">
+            <td colspan="6">
+              <span class="loader-small loader-inline"></span>
+              Загрузка клиентов...
             </td>
+          </tr>
+          <tr v-else-if="!clientStore.getClients || clientStore.getClients.length === 0" class="table-empty-row">
+            <td colspan="6">Нет доступных клиентов.</td>
           </tr>
           <tr v-for="client in clientStore.getClients" :key="client.id">
             <td>{{ client.id }}</td>
@@ -288,7 +287,7 @@ tbody tr {
   transition: background-color 0.2s;
 }
 
-tbody tr:hover {
+tbody tr:not(.table-empty-row):hover {
   background-color: #f9f9f9;
 }
 

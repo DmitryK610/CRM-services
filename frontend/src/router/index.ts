@@ -8,9 +8,8 @@ import { useAuthStore } from '@/stores/authStore'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-
   
-  routes: routes as Readonly<RouteRecordRaw[]>, // Приведение типа для строгости
+  routes: routes as Readonly<RouteRecordRaw[]>,
 
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
@@ -27,6 +26,7 @@ router.beforeEach(
 
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
 
+    // Теперь это значение АКТУАЛЬНОЕ, даже после перезагрузки страницы
     const isAuthenticated = authStore.isAuthenticated
 
     if (requiresAuth && !isAuthenticated) {

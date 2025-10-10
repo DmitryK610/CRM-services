@@ -6,12 +6,12 @@
  */
 // Приводим базовый URL к каноничному виду без завершающих слэшей; добавим их позже в join
 const rawBase = (import.meta.env.VITE_API_BASE_URL || '/api').toString()
-export const API_BASE_URL = rawBase.replace(/\/$+/, '') // '/api' (без завершающего '/'), либо полный origin
+export const API_BASE_URL = rawBase.replace(/\/+$/, '') // '/api' (без завершающего '/'), либо полный origin
 
 // Унифицированный безопасный конкатенатор путей, чтобы избежать '/apimaterial' или двойных '//'
 export function joinUrl(base: string, endpoint: string): string {
   // base без завершающего '/', endpoint без начальных '/'
-  const cleanBase = base.replace(/\/$+/, '')
+  const cleanBase = base.replace(/\/+$/, '')
   const cleanEndpoint = endpoint.replace(/^\/+/, '')
   return `${cleanBase}/${cleanEndpoint}`
 }

@@ -18,7 +18,7 @@
       ⚠️ Ошибка загрузки данных: {{ error || attachmentStore.attachmentError }}
     </div>
     
-    <div v-else-if="paginatedOrders.length > 0" class="table-container">
+    <div class="table-container">
       <table>
         <thead>
           <tr>
@@ -33,57 +33,61 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="orderWithDetails in paginatedOrders" :key="orderWithDetails.id">
-            <td>{{ orderWithDetails.id }}</td>
-            <td>{{ formatDate(orderWithDetails.order_date) }}</td>
-            <td>{{ orderWithDetails.clientName || 'N/A' }}</td>
-            <td>{{ orderWithDetails.material_name || 'N/A' }}</td>
-            <td>{{ formatCurrency(Number(orderWithDetails.total_amount)) }}</td>
-            <td>
-              <span v-if="orderWithDetails.calculation" class="calculation-link">
-                <router-link :to="`/calculations/${orderWithDetails.calculation}`" class="btn btn-sm btn-outline-primary">
-                  Расчет #{{ orderWithDetails.calculation }}
-                </router-link>
-              </span>
-              <span v-else class="text-muted">—</span>
-            </td>
-            <td>
-              <StatusBadge :status="orderWithDetails.status as any" :label="orderWithDetails.status" />
-            </td>
-            <td class="actions-cell">
-              <div class="action-links-container">
-                <button @click="openAttachmentModal(orderWithDetails.id!)" class="btn btn-info" title="Вложения" aria-label="Вложения заказа">
-                  <span class="material-symbols-outlined">attach_file</span>
-                  <span class="btn-text">Вложения ({{ attachmentStore.getAttachmentsForOrder(orderWithDetails.id).length }})</span>
-                </button>
-                <button @click="openDetailsModal(orderWithDetails.id!)" class="btn btn-primary" title="Подробнее" aria-label="Подробнее о заказе">
-                  <span class="material-symbols-outlined">visibility</span>
-                  <span class="btn-text">Подробнее</span>
-                </button>
-              </div>
+          <template v-if="paginatedOrders.length > 0">
+            <tr v-for="orderWithDetails in paginatedOrders" :key="orderWithDetails.id">
+              <td>{{ orderWithDetails.id }}</td>
+              <td>{{ formatDate(orderWithDetails.order_date) }}</td>
+              <td>{{ orderWithDetails.clientName || 'N/A' }}</td>
+              <td>{{ orderWithDetails.material_name || 'N/A' }}</td>
+              <td>{{ formatCurrency(Number(orderWithDetails.total_amount)) }}</td>
+              <td>
+                <span v-if="orderWithDetails.calculation" class="calculation-link">
+                  <router-link :to="`/calculations/${orderWithDetails.calculation}`" class="btn btn-sm btn-outline-primary">
+                    Расчет #{{ orderWithDetails.calculation }}
+                  </router-link>
+                </span>
+                <span v-else class="text-muted">—</span>
+              </td>
+              <td>
+                <StatusBadge :status="orderWithDetails.status as any" :label="orderWithDetails.status" />
+              </td>
+              <td class="actions-cell">
+                <div class="action-links-container">
+                  <button @click="openAttachmentModal(orderWithDetails.id!)" class="btn btn-info" title="Вложения" aria-label="Вложения заказа">
+                    <span class="material-symbols-outlined">attach_file</span>
+                    <span class="btn-text">Вложения ({{ attachmentStore.getAttachmentsForOrder(orderWithDetails.id).length }})</span>
+                  </button>
+                  <button @click="openDetailsModal(orderWithDetails.id!)" class="btn btn-primary" title="Подробнее" aria-label="Подробнее о заказе">
+                    <span class="material-symbols-outlined">visibility</span>
+                    <span class="btn-text">Подробнее</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </template>
+          <tr v-else class="table-empty-row" :class="{ 'table-empty-row--loading': orderStore.getIsLoading }">
+            <td colspan="8">
+              <template v-if="orderStore.getIsLoading">
+                <span class="loader-small loader-inline"></span>
+                Загрузка заказов...
+              </template>
+              <template v-else-if="sortedAndFilteredOrders.length === 0 && filters.query.length > 0">
+                Нет заказов, соответствующих вашим критериям поиска.
+              </template>
+              <template v-else>
+                Нет доступных заказов.
+              </template>
             </td>
           </tr>
         </tbody>
       </table>
       <AppPagination
-        v-if="totalPages > 1 && sortedAndFilteredOrders.length > 0"
+        v-if="totalPages > 1 && paginatedOrders.length > 0"
         :total-items="sortedAndFilteredOrders.length"
         :current-page="currentPage"
         :page-size="pageSize"
         @page-changed="handlePageChanged"
       />
-    </div>
-    <div
-      v-else-if="sortedAndFilteredOrders.length === 0 && filters.query.length > 0 && !isLoading"
-      class="status-message no-results-message"
-    >
-      Нет заказов, соответствующих вашим критериям поиска.
-    </div>
-    <div
-      v-else-if="orderStore.getOrders.length === 0 && filters.query.length === 0 && !isLoading && !error"
-      class="status-message no-orders-available"
-    >
-      Нет доступных заказов.
     </div>
 
     <!-- Модальное окно вложений -->
@@ -198,7 +202,6 @@ const pageSize = ref(10);
 const sortKey = ref('');
 const sortOrder = ref<'asc' | 'desc'>('asc');
 const error = ref<string | null>(null);
-const isLoading = ref(false);
 
 const ordersWithDetails = computed(() => {
   const orders = orderStore.getOrders as any[];
@@ -562,7 +565,7 @@ th.sorted-desc::after {
   transform: translateY(-50%);
 }
 
-tbody tr:hover {
+tbody tr:not(.table-empty-row):hover {
   background-color: #f9f9f9;
 }
 

@@ -18,11 +18,6 @@
       class="search-input full-width-search"
     />
 
-  <div v-if="validCalculations.length === 0 && searchQuery.trim()" class="status-message no-results-message">
-      <p>По запросу "{{ searchQuery }}" ничего не найдено.</p>
-      <button @click="searchQuery = ''" class="btn btn-secondary btn-sm">Очистить поиск</button>
-    </div>
-
   <div class="table-container">
       <table>
         <thead>
@@ -37,74 +32,76 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-if="validCalculations.length === 0 && !searchQuery.trim()">
-            <td colspan="7" class="table-info-cell">
+          <template v-if="validCalculations.length > 0">
+            <tr v-for="calculation in validCalculations" :key="calculation.id || calculation.calculationId">
+              <td>
+                {{ calculation.id || calculation.calculationId }}
+              </td>
+              <td>
+                {{ getClientName(calculation) }}
+              </td>
+              <td>
+                {{ getMaterialInfo(calculation) }}
+              </td>
+              <td class="font-medium">
+                {{ formatCurrency(getTotalCost(calculation)) }}
+              </td>
+              <td>
+                <span v-if="calculation.orderId" class="order-link">
+                  <router-link :to="`/orders/${calculation.orderId}`" class="btn btn-sm btn-outline-success">
+                    Заказ #{{ calculation.orderId }}
+                  </router-link>
+                </span>
+                <span v-else class="text-muted">—</span>
+              </td>
+              <td>
+                {{ formatDate(calculation.createdAt) }}
+              </td>
+              <td class="actions-cell">
+                <div class="action-links-container">
+                  <button
+                    @click="openAttachmentModal(calculation.id || calculation.calculationId)"
+                    class="btn btn-info"
+                    title="Вложения"
+                    aria-label="Вложения расчета"
+                  >
+                    <span class="material-symbols-outlined">attach_file</span>
+                    <span class="btn-text">Вложения ({
+                      (calculation.id || calculation.calculationId)
+                        ? attachmentStore.getAttachmentsForCalculation(Number(calculation.id || calculation.calculationId)).length
+                        : 0
+                    }})</span>
+                  </button>
+                  <router-link
+                    :to="`/calculations/${calculation.id || calculation.calculationId}`"
+                    class="btn btn-primary"
+                    title="Подробнее"
+                    aria-label="Подробнее о расчете"
+                  >
+                    <span class="material-symbols-outlined">visibility</span>
+                    <span class="btn-text">Подробнее</span>
+                  </router-link>
+                </div>
+              </td>
+            </tr>
+          </template>
+          <tr v-else class="table-empty-row" :class="{ 'table-empty-row--loading': calculationStore.isLoading }">
+            <td colspan="7">
               <template v-if="calculationStore.isLoading">
-                <span class="loader-small"></span> Загрузка расчетов...
+                <span class="loader-small loader-inline"></span> Загрузка расчетов...
+              </template>
+              <template v-else-if="searchQuery.trim()">
+                По запросу "{{ searchQuery }}" ничего не найдено.
+                <button @click="searchQuery = ''" class="btn btn-secondary btn-sm" style="margin-left:8px;">Очистить поиск</button>
               </template>
               <template v-else>
                 Пока нет ни одного расчета.
-                <button type="button" class="btn btn-success btn-sm" style="margin-left:8px;" @click="openCreateModal">
-                  Создать первый расчет
-                </button>
               </template>
-            </td>
-          </tr>
-          <tr v-for="calculation in validCalculations" :key="calculation.id || calculation.calculationId">
-            <td>
-              {{ calculation.id || calculation.calculationId }}
-            </td>
-            <td>
-              {{ getClientName(calculation) }}
-            </td>
-            <td>
-              {{ getMaterialInfo(calculation) }}
-            </td>
-            <td class="font-medium">
-              {{ formatCurrency(getTotalCost(calculation)) }}
-            </td>
-            <td>
-              <span v-if="calculation.orderId" class="order-link">
-                <router-link :to="`/orders/${calculation.orderId}`" class="btn btn-sm btn-outline-success">
-                  Заказ #{{ calculation.orderId }}
-                </router-link>
-              </span>
-              <span v-else class="text-muted">—</span>
-            </td>
-            <td>
-              {{ formatDate(calculation.createdAt) }}
-            </td>
-            <td class="actions-cell">
-              <div class="action-links-container">
-                <button
-                  @click="openAttachmentModal(calculation.id || calculation.calculationId)"
-                  class="btn btn-info"
-                  title="Вложения"
-                  aria-label="Вложения расчета"
-                >
-                  <span class="material-symbols-outlined">attach_file</span>
-                  <span class="btn-text">Вложения ({{
-                    (calculation.id || calculation.calculationId)
-                      ? attachmentStore.getAttachmentsForCalculation(Number(calculation.id || calculation.calculationId)).length
-                      : 0
-                  }})</span>
-                </button>
-                <router-link
-                  :to="`/calculations/${calculation.id || calculation.calculationId}`"
-                  class="btn btn-primary"
-                  title="Подробнее"
-                  aria-label="Подробнее о расчете"
-                >
-                  <span class="material-symbols-outlined">visibility</span>
-                  <span class="btn-text">Подробнее</span>
-                </router-link>
-              </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-
     <!-- Модальное окно для вложений -->
     <div v-if="isAttachmentModalOpen" class="modal-overlay" @click.self="closeAttachmentModal">
       <div class="modal-content">
@@ -779,7 +776,7 @@ tbody tr {
   transition: background-color 0.2s;
 }
 
-tbody tr:hover {
+tbody tr:not(.table-empty-row):hover {
   background-color: #f9f9f9;
 }
 
@@ -1128,11 +1125,6 @@ td :is(.btn, .btn-sm, .btn-primary, .btn-secondary, .btn-outline-primary, .btn-i
     min-width: 50px;
     padding: 3px 7px;
     font-size: 11px;
-  }
-
-  .table-info-cell {
-    padding: 14px;
-    font-size: 14px;
   }
 
   .modal-content {

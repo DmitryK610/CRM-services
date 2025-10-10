@@ -9,8 +9,10 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-if="data.length === 0">
-          <td :colspan="columns.length">Нет данных для отображения.</td>
+        <tr v-if="data.length === 0" class="table-empty-row">
+          <td :colspan="columns.length">
+            <slot name="empty-state">{{ emptyMessage }}</slot>
+          </td>
         </tr>
         <tr v-else v-for="item in data" :key="item.id || item.name || item.title || Math.random()">
           <td v-for="column in columns" :key="column.key">
@@ -38,6 +40,10 @@ defineProps({
   columns: {
     type: Array as () => Column[],
     required: true,
+  },
+  emptyMessage: {
+    type: String,
+    default: 'Нет доступных данных.',
   },
 });
 </script>

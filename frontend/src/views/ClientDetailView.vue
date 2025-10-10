@@ -259,7 +259,7 @@ tbody tr {
   transition: background-color 0.2s;
 }
 
-tbody tr:hover {
+tbody tr:not(.table-empty-row):hover {
   background-color: #f9f9f9;
 }
 

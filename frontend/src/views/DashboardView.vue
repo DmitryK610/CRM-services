@@ -26,39 +26,45 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-if="activeOrders.length === 0">
-                  <td colspan="7" style="text-align: center;">
-                    <template v-if="orderStore.isLoading">
-                      <span class="loader-small"></span> Загрузка заказов...
-                    </template>
-                    <template v-else>
-                      Нет заказов в производстве.
-                    </template>
+                <tr v-if="orderStore.isLoading" class="table-empty-row table-empty-row--loading">
+                  <td colspan="7">
+                    <span class="loader-small loader-inline"></span>
+                    Загрузка заказов...
                   </td>
                 </tr>
-                <tr v-for="order in activeOrders" :key="order.id">
-                  <td>{{ order.order_number || `№${order.id}` }}</td>
-                  <td>{{ getClientName(order.client) }}</td>
-                  <td>{{ formatDate(order.order_date) }}</td>
-                  <td class="deadline-cell">{{ formatDate(order.installation_date) }}</td>
-                  <td>{{ order.total_amount ?? '---' }}</td>
-                  <td>
-                    <StatusBadge :status="order.status as any" :label="order.status || 'Статус не указан'" />
-                  </td>
-                  <td class="actions-cell">
-                    <div class="action-links-container">
-                      <button @click="openDetailsModal(order.id!)" class="btn btn-primary" title="Подробнее">
-                        <span class="material-symbols-outlined">visibility</span>
-                        <span class="btn-text">Подробнее</span>
-                      </button>
-                      <button v-if="order.status === OrderStatus.IN_PRODUCTION" @click="completeOrder(order.id!)"
-                        class="btn btn-success" :disabled="orderStore.isLoading" title="Завершить">
-                        <span class="material-symbols-outlined">check_circle</span>
-                        <span class="btn-text">Завершить</span>
-                      </button>
-                    </div>
-                  </td>
+                <tr v-else-if="activeOrders.length === 0" class="table-empty-row">
+                  <td colspan="7">Нет заказов в производстве.</td>
                 </tr>
+                <template v-else>
+                  <tr v-for="order in activeOrders" :key="order.id">
+                    <td>{{ order.order_number || `№${order.id}` }}</td>
+                    <td>{{ getClientName(order.client) }}</td>
+                    <td>{{ formatDate(order.order_date) }}</td>
+                    <td class="deadline-cell">{{ formatDate(order.installation_date) }}</td>
+                    <td>{{ order.total_amount ?? '---' }}</td>
+                    <td>
+                      <StatusBadge :status="order.status as any" :label="order.status || 'Статус не указан'" />
+                    </td>
+                    <td class="actions-cell">
+                      <div class="action-links-container">
+                        <button @click="openDetailsModal(order.id!)" class="btn btn-primary" title="Подробнее">
+                          <span class="material-symbols-outlined">visibility</span>
+                          <span class="btn-text">Подробнее</span>
+                        </button>
+                        <button
+                          v-if="order.status === OrderStatus.IN_PRODUCTION"
+                          @click="completeOrder(order.id!)"
+                          class="btn btn-success"
+                          :disabled="orderStore.isLoading"
+                          title="Завершить"
+                        >
+                          <span class="material-symbols-outlined">check_circle</span>
+                          <span class="btn-text">Завершить</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
@@ -256,23 +262,6 @@ h1 {
   gap: 12px;
 }
 
-.loader-small {
-  display: inline-block;
-  border: 2px solid rgba(0, 0, 0, 0.1);
-  border-top-color: #007bff;
-  border-radius: 50%;
-  width: 14px;
-  height: 14px;
-  animation: spin 0.8s linear infinite;
-  vertical-align: middle;
-  margin-right: 6px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 .stats {
   font-size: 1rem;
   color: #555;
@@ -301,14 +290,13 @@ thead {
 
 th,
 td {
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: 1px solid #e0e0e0;
   text-align: left;
-  font-size: 14px;
+  font-size: 13px;
   vertical-align: middle;
   word-break: break-word;
   white-space: normal;
-  min-height: 30px;
 }
 
 th {
@@ -359,7 +347,7 @@ tbody tr {
   transition: background-color 0.2s;
 }
 
-tbody tr:hover {
+tbody tr:not(.table-empty-row):hover {
   background-color: #f9f9f9;
 }
 
@@ -479,6 +467,29 @@ td.actions-cell {
   padding: 4px 8px;
   font-size: 0.8rem;
   flex-shrink: 0;
+}
+
+.table-empty-row {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.table-empty-row td {
+ 
+  padding: 12px 16px;
+  font-size: 13px;
+  line-height: 1.4;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.table-empty-row--loading {
+  background-color: #eef4ff;
+}
+
+.table-empty-row--loading td {
+  font-style: normal;
+  color: #0065ff;
 }
 
 .auth-message {

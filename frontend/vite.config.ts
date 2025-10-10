@@ -4,7 +4,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue(), vueJsx()],
   resolve: {
@@ -17,13 +17,14 @@ export default defineConfig({
     host: true,
     strictPort: true,
     proxy: {
+      // Когда фронтенд в режиме разработки делает запрос на /api/...,
+      // Vite Dev Server должен перенаправить его на локальный API-шлюз Docker Compose.
       '/api': {
-        target: process.env.NODE_ENV === 'production' 
-          ? 'https://dkor.pro'  // Production: use your domain with HTTPS
-          : 'http://localhost:8000',  // Development: local Django server
+        // ИСПРАВЛЕНО: Target должен быть именем NGINX-шлюза (gateway) в Docker-сети.
+        target: 'http://gateway', 
         changeOrigin: true,
-        secure: process.env.NODE_ENV === 'production',
-        // rewrite: (path) => path.replace(/^\/api/, ''),
+        // ИСПРАВЛЕНО: Убираем rewrite, так как NGINX уже ждет префикс /api/
+        // (Ваш NGINX ожидает /api/users/login/, поэтому префикс /api должен остаться).
       },
     },
   },

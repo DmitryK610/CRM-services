@@ -85,20 +85,32 @@ export default {
   },
   methods: {
     async onSubmit() {
+      console.log('[LoginView] submit', { username: this.username });
       this.authError = false;
       this.isLoading = true;
       const auth = useAuthStore();
       try {
         await auth.login(this.username, this.password);
+        console.log('[LoginView] auth result', {
+          isAuthenticated: auth.isAuthenticated,
+          error: auth.error
+        });
         if (auth.isAuthenticated) {
+          console.log('[LoginView] redirect to Dashboard');
           await this.$router.replace({ name: 'Dashboard' });
         } else {
+          console.warn('[LoginView] auth store not authenticated');
           this.authError = true;
         }
       } catch (e) {
         this.authError = true;
+        console.error('[LoginView] submit error', e);
       } finally {
         this.isLoading = false;
+        console.log('[LoginView] submit finished', {
+          authError: this.authError,
+          isLoading: this.isLoading
+        });
       }
     },
     togglePassword() {

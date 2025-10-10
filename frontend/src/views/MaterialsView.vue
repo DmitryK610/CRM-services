@@ -31,23 +31,23 @@
     <div v-else-if="searchQuery.trim() === ''">
       <div class="status-message no-results-message">Введите запрос для поиска материалов в каталоге.</div>
     </div>
-    <div v-else-if="filteredMaterials.length > 0">
-      <div class="table-container card">
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th class="col-id">№</th>
-                <th class="col-name">Название</th>
-                <th class="col-color-code">Артикул</th>
-                <th class="col-note">Примечание</th>
-                <th class="col-cost">Стоимость ($)</th>
-                <th class="col-cost-rub">Стоимость (руб)</th>
-                <th class="col-supplier">Поставщик</th>
-                <th class="col-actions">Действия</th>
-              </tr>
-            </thead>
-            <tbody>
+    <div v-else class="table-container card">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-id">№</th>
+              <th class="col-name">Название</th>
+              <th class="col-color-code">Артикул</th>
+              <th class="col-note">Примечание</th>
+              <th class="col-cost">Стоимость ($)</th>
+              <th class="col-cost-rub">Стоимость (руб)</th>
+              <th class="col-supplier">Поставщик</th>
+              <th class="col-actions">Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-if="filteredMaterials.length > 0">
               <tr v-for="material in filteredMaterials" :key="material.id">
                 <td class="col-id">{{ material.id }}</td>
                 <td class="col-name">{{ material.material_name || '---' }}</td>
@@ -65,13 +65,13 @@
                   </div>
                 </td>
               </tr>
-            </tbody>
-          </table>
-        </div>
+            </template>
+            <tr v-else class="table-empty-row">
+              <td colspan="8">Нет доступных материалов по вашему запросу.</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </div>
-    <div v-else>
-      <div class="status-message no-results-message">Нет доступных материалов по вашему запросу.</div>
     </div>
 
     <hr class="divider section-divider">
@@ -114,9 +114,9 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-if="!isPurchaseListLoading && filteredPurchases.length === 0 && !purchaseListError">
-              <td :colspan="11" class="table-info-cell">
-                <span v-if="purchaseSearchQuery.trim() === ''">Нет данных о закупках. Добавьте первую запись.</span>
+            <tr v-if="filteredPurchases.length === 0 && !purchaseListError" class="table-empty-row">
+              <td :colspan="11">
+                <span v-if="purchaseSearchQuery.trim() === ''">Нет данных о закупках.</span>
                 <span v-else>Нет закупок, соответствующих вашему запросу.</span>
               </td>
             </tr>
@@ -478,7 +478,7 @@ defineExpose({ refreshPurchaseList });
   justify-content: center;
 }
 
-.status-message:not(.error-message):not(.loading-indicator):not(.table-info-cell) {
+.status-message:not(.error-message):not(.loading-indicator) {
   background-color: #fff3cd;
   color: #856404;
   border: 1px solid #ffeeba;
@@ -524,16 +524,6 @@ defineExpose({ refreshPurchaseList });
 }
 
 /* old custom .button styles removed in favor of .btn */
-
-.table-info-cell {
-  padding: 16px;
-  border-radius: 8px;
-  background-color: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeeba;
-  font-style: italic;
-  text-align: center;
-}
 
 .table-container {
   border: 1px solid #e0e0e0;
@@ -603,7 +593,7 @@ tbody tr:last-child {
   border-bottom: none;
 }
 
-tbody tr:hover {
+tbody tr:not(.table-empty-row):hover {
   background-color: #f9f9f9;
 }
 
@@ -1023,11 +1013,6 @@ th {
     font-size: 9px;
     min-width: 55px;
   }
-
-  .table-info-cell {
-    padding: 14px;
-    font-size: 14px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -1202,11 +1187,6 @@ th {
     padding: 2px 4px;
     font-size: 7px;
     min-width: 45px;
-  }
-
-  .table-info-cell {
-    padding: 10px;
-    font-size: 12px;
   }
 }
 </style>

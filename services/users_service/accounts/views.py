@@ -12,8 +12,8 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ['full_name', 'email', 'phone']
-    ordering_fields = ['registered_at', 'last_login', 'is_active']
+    search_fields = ['username', 'full_name', 'email', 'phone']
+    ordering_fields = ['registered_at', 'last_login', 'is_active', 'username']
     pagination_class = UserPagination
 
 class RoleViewSet(viewsets.ModelViewSet):
